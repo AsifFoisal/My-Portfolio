@@ -7,8 +7,16 @@ async function PortfolioWithData() {
   // connection() marks this dynamic and keeps the page cacheable as a shell
   const { connection } = await import("next/server");
   await connection();
-  const { projects, settings } = await getPublicData();
-  return <Portfolio projects={projects} settings={settings} />;
+  const { projects, settings, skillSections, education, experience } = await getPublicData();
+  return (
+    <Portfolio
+      projects={projects}
+      settings={settings}
+      skillSections={skillSections}
+      education={education}
+      experience={experience}
+    />
+  );
 }
 
 export default function Home() {

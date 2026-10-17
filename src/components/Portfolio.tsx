@@ -3,8 +3,18 @@
 import { useEffect } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import { PROJECTS, type Project } from "@/data/projects";
-import { DEFAULT_SETTINGS } from "@/lib/defaults";
-import type { SiteSettings } from "@/lib/types";
+import {
+  DEFAULT_EDUCATION,
+  DEFAULT_EXPERIENCE,
+  DEFAULT_SETTINGS,
+  DEFAULT_SKILL_SECTIONS,
+} from "@/lib/defaults";
+import type {
+  EducationItem,
+  ExperienceItem,
+  SiteSettings,
+  SkillSection,
+} from "@/lib/types";
 
 /* inline style helpers */
 const sd = (delay: string) => ({ "--d": delay }) as CSSProperties;
@@ -47,27 +57,26 @@ const SOCIAL_ICONS: { label: string; d: string }[] = [
   },
 ];
 
-/* education side panel — the record rendered as a source file */
-const EDU_CODE = `<span class="ck">const</span> <span class="cn">education</span> <span class="cm">=</span> {
-  bsc: {
-    years: <span class="cs">"2021 — 2025"</span>,
-    school: <span class="cs">"Daffodil Intl. Univ."</span>,
-    degree: <span class="cs">"B.Sc. in CSE"</span>,
-    cgpa: <span class="cs">"3.72 / 4.00"</span>,
-  },
-  hsc: {
-    years: <span class="cs">"2018 — 2020"</span>,
-    gpa: <span class="cs">"5.00 / 5.00"</span>,
-  },
-  ssc: {
-    years: <span class="cs">"2018"</span>,
-    gpa: <span class="cs">"5.00 / 5.00"</span>,
-  },
-  club: <span class="cs">"vice-captain, coding club"</span>,
-  status: <span class="cs">"curiosity: infinite"</span><span class="cm">;</span>
+/* education side panel — generated from the education data */
+function escHtml(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
-<span class="cm">// compiled with ☕ + ⌨, never minified</span>
-<span class="caret"></span>`;
+function buildEduCode(items: EducationItem[], eduPanel: SiteSettings["eduPanel"]): string {
+  const lines: string[] = [];
+  lines.push(`<span class="ck">const</span> <span class="cn">education</span> <span class="cm">=</span> [`);
+  items.forEach((e) => {
+    lines.push(`  {`);
+    if (e.period) lines.push(`    years: <span class="cs">"${escHtml(e.period)}"</span>,`);
+    if (e.institution) lines.push(`    school: <span class="cs">"${escHtml(e.institution)}"</span>,`);
+    if (e.title) lines.push(`    degree: <span class="cs">"${escHtml(e.title)}"</span>,`);
+    if (e.result) lines.push(`    result: <span class="cs">"${escHtml(e.result)}"</span>,`);
+    lines.push(`  },`);
+  });
+  lines.push(`];`);
+  if (eduPanel.status) lines.push(`<span class="ck">const</span> <span class="cn">status</span> <span class="cm">=</span> <span class="cs">"${escHtml(eduPanel.status)}"</span>;`);
+  lines.push(`<span class="cm">// compiled with ☕ + ⌨, never minified</span><span class="caret"></span>`);
+  return lines.join("\n");
+}
 
 /* experience side panel — equalizer bar heights (px) */
 const EQ_BARS = [34, 48, 26, 56, 32, 60, 38, 44, 28, 52, 36, 58, 30, 46, 40];
@@ -75,9 +84,15 @@ const EQ_BARS = [34, 48, 26, 56, 32, 60, 38, 44, 28, 52, 36, 58, 30, 46, 40];
 export default function Portfolio({
   projects = PROJECTS,
   settings = DEFAULT_SETTINGS,
+  skillSections = DEFAULT_SKILL_SECTIONS,
+  education = DEFAULT_EDUCATION,
+  experience = DEFAULT_EXPERIENCE,
 }: {
   projects?: Project[];
   settings?: SiteSettings;
+  skillSections?: SkillSection[];
+  education?: EducationItem[];
+  experience?: ExperienceItem[];
 }) {
   const roles = settings.roles.length ? settings.roles : DEFAULT_SETTINGS.roles;
   const slugOf = (p: Project) =>
@@ -281,6 +296,24 @@ export default function Portfolio({
     });
     observers.push(rvIO);
 
+    /* after admin saves, router.refresh()/hot reloads swap in fresh nodes —
+       re-arm reveal observers whenever they appear */
+    const mo = new MutationObserver((muts) => {
+      muts.forEach((m) => {
+        if (m.type === "attributes") {
+          const el = m.target as HTMLElement;
+          if (el.classList.contains("rv") && !el.classList.contains("in")) rvIO.observe(el);
+          return;
+        }
+        m.addedNodes.forEach((n) => {
+          if (!(n instanceof HTMLElement)) return;
+          if (n.classList.contains("rv") && !n.classList.contains("in")) rvIO.observe(n);
+          n.querySelectorAll<HTMLElement>(".rv:not(.in)").forEach((el) => rvIO.observe(el));
+        });
+      });
+    });
+    mo.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
+
     /* ---------- COUNTERS ---------- */
     const cIO = new IntersectionObserver((es) => es.forEach((e) => {
       if (!e.isIntersecting) return;
@@ -295,20 +328,6 @@ export default function Portfolio({
     }), { threshold: .5 });
     document.querySelectorAll<HTMLElement>("[data-count]").forEach((el) => cIO.observe(el));
     observers.push(cIO);
-
-    /* ---------- SKILL BARS ---------- */
-    const skillCats = $("skillCats");
-    if (skillCats) {
-      const sIO = new IntersectionObserver((es) => es.forEach((e) => {
-        if (!e.isIntersecting) return;
-        sIO.unobserve(e.target);
-        e.target.querySelectorAll<HTMLElement>(".meter i").forEach((i) => {
-          i.style.width = (i.dataset.level ?? "") + "%";
-        });
-      }), { threshold: .25 });
-      sIO.observe(skillCats);
-      observers.push(sIO);
-    }
 
     /* ---------- PARALLAX ---------- */
     const paraEls = [...document.querySelectorAll<HTMLElement>("[data-para]")];
@@ -793,33 +812,40 @@ export default function Portfolio({
             <p className="sec-sub rv">Technologies I reach for daily — measured honestly, sharpened constantly.</p>
 
             <div className="skill-cats" id="skillCats">
-              <div className="skill-cat rv" data-icon="{ }">
-                <div className="cat-head"><h3>Frontend</h3><span className="mono">UI / CLIENT</span></div>
-                <div className="skill"><div className="skill-top"><b>HTML &amp; CSS</b><span className="mono">95%</span></div><div className="meter"><i data-level="95" /></div></div>
-                <div className="skill"><div className="skill-top"><b>React.js</b><span className="mono">90%</span></div><div className="meter"><i data-level="90" /></div></div>
-                <div className="skill"><div className="skill-top"><b>Tailwind CSS</b><span className="mono">92%</span></div><div className="meter"><i data-level="92" /></div></div>
-                <div className="skill"><div className="skill-top"><b>Next.js</b><span className="mono">85%</span></div><div className="meter"><i data-level="85" /></div></div>
-                <div className="skill"><div className="skill-top"><b>TypeScript</b><span className="mono">82%</span></div><div className="meter"><i data-level="82" /></div></div>
-                <div className="skill"><div className="skill-top"><b>Redux / Zustand</b><span className="mono">80%</span></div><div className="meter"><i data-level="80" /></div></div>
-              </div>
-              <div className="skill-cat rv" data-icon="⚙" style={sd(".1s")}>
-                <div className="cat-head"><h3>Backend</h3><span className="mono">API / SERVER</span></div>
-                <div className="skill"><div className="skill-top"><b>Node.js</b><span className="mono">88%</span></div><div className="meter"><i data-level="88" /></div></div>
-                <div className="skill"><div className="skill-top"><b>Express.js</b><span className="mono">90%</span></div><div className="meter"><i data-level="90" /></div></div>
-                <div className="skill"><div className="skill-top"><b>MongoDB / Mongoose</b><span className="mono">85%</span></div><div className="meter"><i data-level="85" /></div></div>
-                <div className="skill"><div className="skill-top"><b>PostgreSQL</b><span className="mono">75%</span></div><div className="meter"><i data-level="75" /></div></div>
-                <div className="skill"><div className="skill-top"><b>REST &amp; GraphQL</b><span className="mono">80%</span></div><div className="meter"><i data-level="80" /></div></div>
-                <div className="skill"><div className="skill-top"><b>Auth / JWT / OAuth</b><span className="mono">85%</span></div><div className="meter"><i data-level="85" /></div></div>
-              </div>
-              <div className="skill-cat rv" data-icon="$" style={sd(".2s")}>
-                <div className="cat-head"><h3>Tools &amp; DevOps</h3><span className="mono">WORKFLOW</span></div>
-                <div className="skill"><div className="skill-top"><b>Git &amp; GitHub</b><span className="mono">90%</span></div><div className="meter"><i data-level="90" /></div></div>
-                <div className="skill"><div className="skill-top"><b>Vercel / Netlify</b><span className="mono">85%</span></div><div className="meter"><i data-level="85" /></div></div>
-                <div className="skill"><div className="skill-top"><b>Figma → Code</b><span className="mono">78%</span></div><div className="meter"><i data-level="78" /></div></div>
-                <div className="skill"><div className="skill-top"><b>Postman / Testing</b><span className="mono">80%</span></div><div className="meter"><i data-level="80" /></div></div>
-                <div className="skill"><div className="skill-top"><b>Docker</b><span className="mono">70%</span></div><div className="meter"><i data-level="70" /></div></div>
-                <div className="skill"><div className="skill-top"><b>Linux / Bash</b><span className="mono">72%</span></div><div className="meter"><i data-level="72" /></div></div>
-              </div>
+              {skillSections.map((cat, ci) => (
+                <div
+                  className="skill-cat rv"
+                  data-icon={cat.icon}
+                  key={cat.id ?? cat.name}
+                  style={sd(`${(ci * 0.1).toFixed(1)}s`)}
+                >
+                  <div className="cat-head"><h3>{cat.name}</h3><span className="mono">{cat.label}</span></div>
+                  {cat.skills.map((s) => (
+                    <span className="skill-pill" key={s.id ?? s.name}>
+                      {s.logo ? (
+                        <>
+                          <img
+                            className="skill-logo"
+                            src={`https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/${s.logo}.svg`}
+                            alt=""
+                            loading="lazy"
+                            onError={(ev) => {
+                              const img = ev.currentTarget;
+                              img.style.display = "none";
+                              const fb = img.nextElementSibling as HTMLElement | null;
+                              if (fb) fb.style.display = "inline-flex";
+                            }}
+                          />
+                          <span className="skill-logo-fallback hide">{s.icon || "✦"}</span>
+                        </>
+                      ) : (
+                        <span className="skill-logo-fallback">{s.icon || "✦"}</span>
+                      )}
+                      <b>{s.name}</b>
+                    </span>
+                  ))}
+                </div>
+              ))}
             </div>
 
             <div className="skill-foot rv">
@@ -839,38 +865,26 @@ export default function Portfolio({
             </div>
             <div className="edu-grid">
               <div className="edu-list">
-              <div className="edu-card rv">
-                <div className="edu-year">2021 — 2025</div>
-                <div>
-                  <h3>B.Sc. in Computer Science &amp; Engineering</h3>
-                  <div className="inst">Daffodil International University · Khulna</div>
-                  <div className="res">CGPA: <b>3.72 / 4.00</b> · Vice-captain, DIU Computer &amp; Coding Club</div>
-                  <div className="courses"><i>Data Structures</i><i>Algorithms</i><i>DBMS</i><i>Software Engineering</i><i>Web Technologies</i><i>Computer Networks</i></div>
-                </div>
-              </div>
-              <div className="edu-card rv" style={sd(".1s")}>
-                <div className="edu-year">2018 — 2020</div>
-                <div>
-                  <h3>HSC — Science</h3>
-                  <div className="inst">Govt. Science College · Khulna</div>
-                  <div className="res">GPA: <b>5.00 / 5.00</b> · Physics, Chemistry, Higher Math</div>
-                </div>
-              </div>
-              <div className="edu-card rv" style={sd(".2s")}>
-                <div className="edu-year">2018</div>
-                <div>
-                  <h3>SSC — Science</h3>
-                  <div className="inst">Ideal School &amp; College · Khulna</div>
-                  <div className="res">GPA: <b>5.00 / 5.00</b> · First encounter with HTML, never recovered</div>
-                </div>
-              </div>
+                {education.map((e, i) => (
+                  <div className="edu-card rv" key={e.id ?? e.title} style={sd(`${(i * 0.1).toFixed(1)}s`)}>
+                    <div className="edu-year">{e.period}</div>
+                    <div>
+                      <h3>{e.title}</h3>
+                      <div className="inst">{e.institution}</div>
+                      <div className="res" dangerouslySetInnerHTML={{ __html: e.result }} />
+                      {e.courses.length > 0 && (
+                        <div className="courses">{e.courses.map((c) => <i key={c}>{c}</i>)}</div>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
               <aside className="edu-panel rv" style={sd(".2s")}>
                 <div className="edu-panel-head">
                   <span className="dot r" /><span className="dot y" /><span className="dot g" />
                   <span className="edu-panel-title">education.ts — asif@dev</span>
                 </div>
-                <pre className="edu-code"><code dangerouslySetInnerHTML={{ __html: EDU_CODE }} /></pre>
+                <pre className="edu-code"><code dangerouslySetInnerHTML={{ __html: buildEduCode(education, settings.eduPanel) }} /></pre>
               </aside>
             </div>
           </div>
@@ -886,30 +900,15 @@ export default function Portfolio({
             </div>
             <div className="xp-grid">
             <div className="xp">
-              <div className="xp-item rv">
-                <div className="xp-meta"><h3>Full Stack Developer</h3><span className="co">@ TechNest Labs</span><span className="yr">Jan 2024 — Present</span></div>
-                <ul>
-                  <li>Building and maintaining MERN-based client dashboards used by 5,000+ monthly users.</li>
-                  <li>Cut average page load time by 40% through code-splitting, lazy routes and image optimization.</li>
-                  <li>Designed a reusable component library adopted across 3 internal products; mentoring 2 interns.</li>
-                </ul>
-              </div>
-              <div className="xp-item rv" style={sd(".1s")}>
-                <div className="xp-meta"><h3>Web Developer Intern</h3><span className="co">@ Craftden Studio</span><span className="yr">Jun 2023 — Dec 2023</span></div>
-                <ul>
-                  <li>Shipped 6 client websites from Figma handoff to production, pixel-perfect and responsive.</li>
-                  <li>Integrated REST APIs, payment gateways (bKash / Stripe) and CMS back-ends.</li>
-                  <li>Introduced Git workflow &amp; code reviews to a team of four, reducing merge conflicts to near zero.</li>
-                </ul>
-              </div>
-              <div className="xp-item rv" style={sd(".2s")}>
-                <div className="xp-meta"><h3>Freelance Web Developer</h3><span className="co">@ Upwork · Fiverr</span><span className="yr">2022 — Present</span></div>
-                <ul>
-                  <li>Delivered 15+ projects — landing pages, e-commerce stores, booking systems — with a 5.0★ average rating.</li>
-                  <li>Handled the full cycle: scoping calls, estimation, development, deployment and post-launch support.</li>
-                </ul>
-              </div>
-              </div>
+              {experience.map((x, i) => (
+                <div className="xp-item rv" key={x.id ?? x.role} style={sd(`${(i * 0.1).toFixed(1)}s`)}>
+                  <div className="xp-meta"><h3>{x.role}</h3><span className="co">@ {x.company}</span><span className="yr">{x.period}</span></div>
+                  <ul>
+                    {x.bullets.map((b, bi) => <li key={bi}>{b}</li>)}
+                  </ul>
+                </div>
+              ))}
+            </div>
               <aside className="xp-panel rv" style={sd(".2s")}>
                 <div className="edu-panel-head">
                   <span className="dot r" /><span className="dot y" /><span className="dot g" />
@@ -917,14 +916,14 @@ export default function Portfolio({
                 </div>
                 <div className="xp-body">
                   <div className="xp-big">
-                    <div><div className="num"><span data-count="25">0</span><em>+</em></div><div className="lbl">Projects Shipped</div></div>
-                    <div><div className="num"><span data-count="5">0</span><em>.0★</em></div><div className="lbl">Freelance Rating</div></div>
+                    <div><div className="num"><span data-count={settings.stats.projects}>0</span><em>+</em></div><div className="lbl">Projects Shipped</div></div>
+                    <div><div className="num">{settings.monitor.rating}</div><div className="lbl">{settings.monitor.ratingLabel}</div></div>
                   </div>
-                  <div className="xp-row"><span>❯ clients_happy</span><span className="lead" /><span className="val">12+</span></div>
-                  <div className="xp-row"><span>❯ commits_per_year</span><span className="lead" /><span className="val">1.2k+</span></div>
-                  <div className="xp-row"><span>❯ uptime_freelance</span><span className="lead" /><span className="val">100%</span></div>
-                  <div className="xp-row"><span>❯ speed_gained</span><span className="lead" /><span className="val">+40%</span></div>
-                  <div className="xp-row"><span>❯ interns_mentored</span><span className="lead" /><span className="val">02</span></div>
+                  {settings.monitor.rows.map((r) => (
+                    <div className="xp-row" key={r.label}>
+                      <span>❯ {r.label}</span><span className="lead" /><span className="val">{r.value}</span>
+                    </div>
+                  ))}
                   <div className="xp-eq" aria-hidden="true">
                     {EQ_BARS.map((h, i) => (
                       <span
@@ -934,7 +933,7 @@ export default function Portfolio({
                     ))}
                   </div>
                   <div className="xp-eq-cap">keyboard_traffic — live feed</div>
-                  <div className="xp-ping"><i />asiffoisal.dev → <b>200 OK</b> · open to work</div>
+                  <div className="xp-ping"><i />{settings.monitor.ping}</div>
                 </div>
               </aside>
             </div>

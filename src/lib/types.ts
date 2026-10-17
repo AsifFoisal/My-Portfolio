@@ -29,6 +29,22 @@ export interface Inquiry {
   created_at: string;
 }
 
+export interface MonitorRow {
+  label: string;
+  value: string;
+}
+
+export interface MonitorConfig {
+  rating: string;
+  ratingLabel: string;
+  rows: MonitorRow[];
+  ping: string;
+}
+
+export interface EduPanelConfig {
+  status: string;
+}
+
 export interface SiteSettings {
   contactEmail: string;
   contactPhoneDisplay: string;
@@ -39,9 +55,52 @@ export interface SiteSettings {
   socialUrls: { github: string; linkedin: string; twitter: string; facebook: string };
   roles: string[];
   stats: { years: number; projects: number; clients: number; commits: number };
+  monitor: MonitorConfig;
+  eduPanel: EduPanelConfig;
 }
 
 export interface PublicData {
   projects: Project[];
   settings: SiteSettings;
+  skillSections: SkillSection[];
+  education: EducationItem[];
+  experience: ExperienceItem[];
+}
+
+export interface SkillItem {
+  id?: string;
+  /** emoji fallback shown when no brand logo is set */
+  icon?: string;
+  /** Simple Icons slug (https://simpleicons.org) — renders the original brand logo */
+  logo?: string;
+  name: string;
+  level: number;
+}
+
+export interface SkillSection {
+  id?: string;
+  name: string;
+  label: string;
+  icon?: string;
+  skills: SkillItem[];
+}
+
+export interface EducationItem {
+  id?: string;
+  period: string;
+  title: string;
+  institution: string;
+  /** may contain inline <b> tags, rendered into the card like the original */
+  result: string;
+  courses: string[];
+  sortOrder?: number;
+}
+
+export interface ExperienceItem {
+  id?: string;
+  role: string;
+  company: string;
+  period: string;
+  bullets: string[];
+  sortOrder?: number;
 }

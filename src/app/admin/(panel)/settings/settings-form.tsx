@@ -110,6 +110,43 @@ export default function SettingsForm({ initial }: { initial: SiteSettings }) {
         </div>
       </div>
 
+      <div className="admin-card">
+        <h3 style={{ margin: "0 0 16px" }}>Career monitor (Experience side panel)</h3>
+        <div className="admin-row">
+          <div className="admin-field">
+            <label htmlFor="monitorRating">Big rating badge</label>
+            <input id="monitorRating" name="monitorRating" type="text" defaultValue={initial.monitor.rating} />
+          </div>
+          <div className="admin-field">
+            <label htmlFor="monitorRatingLabel">Rating label</label>
+            <input id="monitorRatingLabel" name="monitorRatingLabel" type="text" defaultValue={initial.monitor.ratingLabel} />
+          </div>
+        </div>
+        <div className="admin-field">
+          <label htmlFor="monitorRows">Stat rows (one per line — format: label | value)</label>
+          <textarea
+            id="monitorRows"
+            name="monitorRows"
+            defaultValue={initial.monitor.rows.map((r) => `${r.label} | ${r.value}`).join("\n")}
+          />
+        </div>
+        <div className="admin-field" style={{ marginBottom: 0 }}>
+          <label htmlFor="monitorPing">Ping line (bottom of the panel)</label>
+          <input id="monitorPing" name="monitorPing" type="text" defaultValue={initial.monitor.ping} />
+        </div>
+      </div>
+
+      <div className="admin-card">
+        <h3 style={{ margin: "0 0 16px" }}>Education code panel (terminal side text)</h3>
+        <div className="admin-field" style={{ marginBottom: 0 }}>
+          <label htmlFor="eduPanelStatus">Status line</label>
+          <input id="eduPanelStatus" name="eduPanelStatus" type="text" defaultValue={initial.eduPanel.status} />
+        </div>
+        <p className="admin-sub" style={{ margin: 0 }}>
+          Shown as the last lines of the generated <code>education.ts</code> panel.
+        </p>
+      </div>
+
       <button className="admin-btn primary" type="submit" disabled={pending}>
         {pending ? "Saving…" : "Save settings"}
       </button>

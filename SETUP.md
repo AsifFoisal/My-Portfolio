@@ -23,6 +23,14 @@ restart `npm run dev`.
 All DB access happens on the server with the service-role key; the browser
 never sees it. That is why there are no anon policies in the schema.
 
+## 1b. Skills / Education / Experience admin sections
+
+Run `supabase/migration-2-skills-education-experience.sql` in the Supabase SQL
+editor (same as step 1 of the schema). It creates `skill_categories`, `skills`,
+`education`, `experience` — and pre-seeds them with the content currently on
+the site. After that, edit them from `/admin/skills`,
+`/admin/education`, `/admin/experience`.
+
 ## 2. Cloudinary — images
 
 1. Create a free account at https://cloudinary.com → Dashboard → copy

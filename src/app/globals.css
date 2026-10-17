@@ -262,18 +262,18 @@ html.lock, html.lock body{overflow:hidden}
 .cat-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:16px;border-bottom:1px dashed var(--line)}
 .cat-head h3{font-family:var(--disp);font-weight:700;font-size:1.15rem}
 .cat-head .mono{font-size:11px;color:var(--acc);letter-spacing:.14em}
-.skill{margin-bottom:18px}
-.skill:last-child{margin-bottom:0}
-.skill-top{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:8px}
-.skill-top b{font-weight:600}
-.skill-top .mono{color:var(--amb);font-size:11.5px}
-.meter{height:5px;background:rgba(226,238,255,.08);border-radius:3px;overflow:hidden}
-.meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--acc),#8ff5c9);border-radius:3px;transition:width 1.3s var(--ease)}
+.skill-pills{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:6px}
+.skill-pill{display:inline-flex;align-items:center;gap:9px;font-size:13px;color:var(--text);background:var(--bg2);border:1px solid var(--line);border-radius:999px;padding:9px 15px;transition:border-color .25s,transform .25s,box-shadow .25s}
+.skill-pill:hover{border-color:var(--acc);transform:translateY(-2px);box-shadow:0 8px 22px rgba(77,240,165,.14)}
+.skill-pill b{font-weight:600;font-size:13px}
+.skill-logo{width:17px;height:17px;flex-shrink:0}
+.skill-logo-fallback{display:inline-flex;align-items:center;justify-content:center;color:var(--acc);font-size:13px}
+.skill-logo-fallback.hide{display:none}
 .skill-foot{margin-top:44px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 .skill-foot .mono{font-size:12px;color:var(--dim);margin-right:6px}
 
 /* ============ EDUCATION & EXPERIENCE ============ */
-.edu-grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:clamp(28px,4vw,52px);align-items:start}
+.edu-grid{display:grid;grid-template-columns:minmax(0,1fr) 440px;gap:clamp(28px,4vw,52px);align-items:start}
 .edu-list{display:flex;flex-direction:column;gap:18px}
 /* side panel — the education record rendered as a themed source file */
 .edu-panel{position:sticky;top:calc(var(--nav-h) + 38px);background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}

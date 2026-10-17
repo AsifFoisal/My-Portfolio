@@ -8,6 +8,9 @@ import "../admin.css";
 const NAV = [
   { href: "/admin", label: "◫ Dashboard" },
   { href: "/admin/projects", label: "▤ Projects" },
+  { href: "/admin/skills", label: "⚡ Skills" },
+  { href: "/admin/education", label: "🎓 Education" },
+  { href: "/admin/experience", label: "💼 Experience" },
   { href: "/admin/inquiries", label: "✉ Inquiries" },
   { href: "/admin/settings", label: "⚙ Settings" },
 ];

@@ -58,3 +58,8 @@
 @keyframes adminToastIn{from{opacity:0;transform:translateY(16px) scale(.96)}to{opacity:1;transform:none}}
 @keyframes adminToastOut{to{opacity:0;transform:translateY(12px) scale(.96)}}
 .admin-btn.danger.confirming{background:var(--red);border-color:var(--red);color:#fff}
+
+/* inline editor inputs (skills grid etc.) */
+.admin-input{width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:8px;color:var(--text);font-family:var(--body);font-size:13px;padding:9px 11px;box-sizing:border-box;outline:none;transition:border-color .25s,box-shadow .25s}
+.admin-input:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(77,240,165,.12)}
+.admin-input.center{text-align:center}

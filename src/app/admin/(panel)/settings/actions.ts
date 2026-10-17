@@ -30,6 +30,23 @@ export async function saveSettings(formData: FormData) {
       clients: Number(formData.get("statClients") ?? 0) || 0,
       commits: Number(formData.get("statCommits") ?? 0) || 0,
     },
+    monitor: {
+      rating: String(formData.get("monitorRating") ?? "").trim(),
+      ratingLabel: String(formData.get("monitorRatingLabel") ?? "").trim() || "Freelance Rating",
+      ping: String(formData.get("monitorPing") ?? "").trim(),
+      rows: String(formData.get("monitorRows") ?? "")
+        .split("\n")
+        .map((l) => l.trim())
+        .filter(Boolean)
+        .map((l) => {
+          const [label, ...rest] = l.split("|");
+          return { label: (label || "").trim(), value: rest.join("|").trim() };
+        })
+        .filter((r) => r.label),
+    },
+    eduPanel: {
+      status: String(formData.get("eduPanelStatus") ?? "").trim(),
+    },
   };
 
   const { error } = await getSupabase()!

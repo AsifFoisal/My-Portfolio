@@ -1,11 +1,57 @@
 import { PROJECTS } from "@/data/projects";
 import { getSupabase, isDbConfigured } from "@/lib/supabase";
-import { DEFAULT_SETTINGS } from "@/lib/defaults";
-import type { Project, PublicData, SiteSettings } from "@/lib/types";
+import {
+  DEFAULT_EDUCATION,
+  DEFAULT_EXPERIENCE,
+  DEFAULT_SETTINGS,
+  DEFAULT_SKILL_SECTIONS,
+} from "@/lib/defaults";
+import type {
+  EducationItem,
+  ExperienceItem,
+  Project,
+  PublicData,
+  SiteSettings,
+  SkillSection,
+} from "@/lib/types";
 
 export { DEFAULT_SETTINGS, isDbConfigured };
 
 const SETTINGS_KEY = "site";
+
+type SkillCategoryRow = {
+  id: string;
+  name: string;
+  label: string | null;
+  icon: string | null;
+  sort_order: number | null;
+};
+type SkillRow = {
+  id: string;
+  category_id: string;
+  icon: string | null;
+  logo: string | null;
+  name: string;
+  level: number | null;
+  sort_order: number | null;
+};
+type EducationRow = {
+  id: string;
+  period: string | null;
+  title: string;
+  institution: string | null;
+  result: string | null;
+  courses: string[] | null;
+  sort_order: number | null;
+};
+type ExperienceRow = {
+  id: string;
+  role: string;
+  company: string | null;
+  period: string | null;
+  bullets: string[] | null;
+  sort_order: number | null;
+};
 
 type ProjectsRow = {
   id: string;
@@ -60,6 +106,15 @@ function mergeSettings(stored: Partial<SiteSettings> | null | undefined): SiteSe
     ...(stored ?? {}),
     socialUrls: { ...DEFAULT_SETTINGS.socialUrls, ...(stored?.socialUrls ?? {}) },
     stats: { ...DEFAULT_SETTINGS.stats, ...(stored?.stats ?? {}) },
+    eduPanel: { ...DEFAULT_SETTINGS.eduPanel, ...(stored?.eduPanel ?? {}) },
+    monitor: {
+      ...DEFAULT_SETTINGS.monitor,
+      ...(stored?.monitor ?? {}),
+      rows:
+        stored?.monitor?.rows && stored.monitor.rows.length
+          ? stored.monitor.rows
+          : DEFAULT_SETTINGS.monitor.rows,
+    },
     roles: stored?.roles?.length ? stored.roles : DEFAULT_SETTINGS.roles,
   };
 }
@@ -109,6 +164,174 @@ export async function getAdminProjects(): Promise<{
 
 /** What the home page renders with. */
 export async function getPublicData(): Promise<PublicData> {
-  const [projects, settings] = await Promise.all([getProjects(), getSettings()]);
-  return { projects, settings };
+  const [projects, settings, skillSections, education, experience] = await Promise.all([
+    getProjects(),
+    getSettings(),
+    getSkillSections(),
+    getEducation(),
+    getExperience(),
+  ]);
+  return { projects, settings, skillSections, education, experience };
+}
+
+/* ---------- SKILLS ---------- */
+
+export async function getSkillSections(): Promise<SkillSection[]> {
+  if (!isDbConfigured()) return DEFAULT_SKILL_SECTIONS;
+  const supabase = getSupabase()!;
+  const [cats, skills] = await Promise.all([
+    supabase.from("skill_categories").select("*").order("sort_order", { ascending: true }),
+    supabase.from("skills").select("*").order("sort_order", { ascending: true }),
+  ]);
+  // missing tables (migration not run) → keep the site rendering with defaults
+  if (cats.error || !cats.data || skills.error || !skills.data) return DEFAULT_SKILL_SECTIONS;
+  return (cats.data as SkillCategoryRow[])
+    .map((c) => ({
+      id: c.id,
+      name: c.name,
+      label: c.label ?? "",
+      icon: c.icon ?? "",
+      skills: (skills.data as SkillRow[])
+        .filter((s) => s.category_id === c.id)
+        .map((s) => ({ id: s.id, icon: s.icon ?? "", logo: s.logo ?? "", name: s.name, level: s.level ?? 0 })),
+    }))
+    .filter((sec) => sec.skills.length > 0);
+}
+
+export async function getAdminSkillSections(): Promise<{
+  configured: boolean;
+  fromDb: boolean;
+  error?: string;
+  sections: SkillSection[];
+}> {
+  if (!isDbConfigured()) return { configured: false, fromDb: false, sections: DEFAULT_SKILL_SECTIONS };
+  const supabase = getSupabase()!;
+  const [cats, skills] = await Promise.all([
+    supabase.from("skill_categories").select("*").order("sort_order", { ascending: true }),
+    supabase.from("skills").select("*").order("sort_order", { ascending: true }),
+  ]);
+  if (cats.error || skills.error || !cats.data) {
+    return {
+      configured: true,
+      fromDb: false,
+      sections: DEFAULT_SKILL_SECTIONS,
+      error: cats.error?.message ?? skills.error?.message ?? "Query failed",
+    };
+  }
+  const sections = (cats.data as SkillCategoryRow[]).map((c) => ({
+    id: c.id,
+    name: c.name,
+    label: c.label ?? "",
+    icon: c.icon ?? "",
+    skills: (skills.data as SkillRow[])
+      .filter((s) => s.category_id === c.id)
+      .map((s) => ({ id: s.id, icon: s.icon ?? "", logo: s.logo ?? "", name: s.name, level: s.level ?? 0 })),
+  }));
+  return { configured: true, fromDb: true, sections };
+}
+
+/* ---------- EDUCATION ---------- */
+
+export async function getEducation(): Promise<EducationItem[]> {
+  if (!isDbConfigured()) return DEFAULT_EDUCATION;
+  const supabase = getSupabase()!;
+  const { data, error } = await supabase
+    .from("education")
+    .select("*")
+    .order("sort_order", { ascending: true });
+  if (error || !data) return DEFAULT_EDUCATION;
+  return (data as EducationRow[]).map((row) => ({
+    id: row.id,
+    period: row.period ?? "",
+    title: row.title,
+    institution: row.institution ?? "",
+    result: row.result ?? "",
+    courses: row.courses ?? [],
+  }));
+}
+
+export async function getAdminEducation(): Promise<{
+  configured: boolean;
+  fromDb: boolean;
+  error?: string;
+  items: EducationItem[];
+}> {
+  if (!isDbConfigured()) return { configured: false, fromDb: false, items: DEFAULT_EDUCATION };
+  const supabase = getSupabase()!;
+  const { data, error } = await supabase
+    .from("education")
+    .select("*")
+    .order("sort_order", { ascending: true });
+  if (error || !data) {
+    return {
+      configured: true,
+      fromDb: false,
+      items: DEFAULT_EDUCATION,
+      error: error?.message ?? "Query failed",
+    };
+  }
+  return {
+    configured: true,
+    fromDb: true,
+    items: (data as EducationRow[]).map((row) => ({
+      id: row.id,
+      period: row.period ?? "",
+      title: row.title,
+      institution: row.institution ?? "",
+      result: row.result ?? "",
+      courses: row.courses ?? [],
+    })),
+  };
+}
+
+/* ---------- EXPERIENCE ---------- */
+
+export async function getExperience(): Promise<ExperienceItem[]> {
+  if (!isDbConfigured()) return DEFAULT_EXPERIENCE;
+  const supabase = getSupabase()!;
+  const { data, error } = await supabase
+    .from("experience")
+    .select("*")
+    .order("sort_order", { ascending: true });
+  if (error || !data) return DEFAULT_EXPERIENCE;
+  return (data as ExperienceRow[]).map((row) => ({
+    id: row.id,
+    role: row.role,
+    company: row.company ?? "",
+    period: row.period ?? "",
+    bullets: row.bullets ?? [],
+  }));
+}
+
+export async function getAdminExperience(): Promise<{
+  configured: boolean;
+  fromDb: boolean;
+  error?: string;
+  items: ExperienceItem[];
+}> {
+  if (!isDbConfigured()) return { configured: false, fromDb: false, items: DEFAULT_EXPERIENCE };
+  const supabase = getSupabase()!;
+  const { data, error } = await supabase
+    .from("experience")
+    .select("*")
+    .order("sort_order", { ascending: true });
+  if (error || !data) {
+    return {
+      configured: true,
+      fromDb: false,
+      items: DEFAULT_EXPERIENCE,
+      error: error?.message ?? "Query failed",
+    };
+  }
+  return {
+    configured: true,
+    fromDb: true,
+    items: (data as ExperienceRow[]).map((row) => ({
+      id: row.id,
+      role: row.role,
+      company: row.company ?? "",
+      period: row.period ?? "",
+      bullets: row.bullets ?? [],
+    })),
+  };
 }
