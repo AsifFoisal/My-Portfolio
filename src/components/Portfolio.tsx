@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import { PROJECTS, type Project } from "@/data/projects";
@@ -23,7 +24,7 @@ const px = (styles: Record<string, string>) => styles as CSSProperties;
 /* ---------- ticker ---------- */
 const TICKER_ITEMS = [
   "React", "Next.js", "Node.js", "Express", "MongoDB", "PostgreSQL", "TypeScript",
-  "Tailwind CSS", "Docker", "GraphQL", "REST APIs", "Figma",
+  "Tailwind CSS", "Docker", "REST APIs", "Figma",
 ];
 
 /* ---------- loader boot lines ---------- */
@@ -706,10 +707,15 @@ export default function Portfolio({
                 <span className="corner c3" aria-hidden="true" />
                 <span className="corner c4" aria-hidden="true" />
                 <div className="p-frame">
-                  <img
+                  <Image
                     src="/hero-portrait.png"
                     alt="G.M Asif Foisal — Full Stack Web Developer"
                     id="heroPhoto"
+                    width={1086}
+                    height={1448}
+                    sizes="(max-width: 900px) 80vw, 450px"
+                    style={{ height: "auto" }}
+                    preload
                   />
                   <span className="scan" />
                 </div>
@@ -754,9 +760,13 @@ export default function Portfolio({
             <div className="about-grid">
               <div className="about-sticky rv">
                 <figure className="about-photo">
-                  <img
-                    src="/about-sketch.png"
-                    alt="Pencil sketch of G.M Asif Foisal"
+                  <Image
+                    src="/about-photo.png"
+                    alt="G.M Asif Foisal — Full Stack Web Developer"
+                    width={768}
+                    height={1024}
+                    sizes="(max-width: 900px) 88vw, 480px"
+                    style={{ height: "auto" }}
                     data-para="0.04"
                   />
                   <figcaption>~/khulna · GMT+6 · probably debugging</figcaption>
@@ -770,30 +780,47 @@ export default function Portfolio({
                 </div>
               </div>
               <div className="about-body">
-                <h3 className="rv">Turning curiosity into <em>clean code</em> — one commit at a time.</h3>
+                <h3 className="rv">From <em>Class 8 curiosity</em> to full-stack developer — and just getting started.</h3>
                 <p className="rv" style={sd(".05s")}>
-                  My journey started in 2019 with a simple act of rebellion: <b>right-click → Inspect Element</b>. I wanted to change the color of a button on my favorite website, and somehow ended up rewriting my entire career plan. A few months later I wrote my first &quot;Hello, World!&quot; in Python, then discovered C in my first university semester — but the real spark came when <b>JavaScript let me make things move, react, and feel alive</b> in the browser. I&apos;ve been hopelessly hooked ever since.
+                  My journey started long before I wrote my first line of C — back in <b>Class 8, when I discovered HTML and CSS</b> through a friend who was surprisingly good at building websites. I didn&apos;t know much about web development back then, but something about turning lines of code into something visual and interactive fascinated me. From that point on, I kept exploring.
                 </p>
                 <p className="rv" style={sd(".1s")}>
-                  Today I work across the full stack — architecting <b>REST APIs and database schemas</b> on one tab while fine-tuning a component&apos;s micro-interaction on the other. The work I enjoy most lives where <b>product thinking meets engineering</b>: taking a fuzzy idea, shaping it into something people actually love using, then obsessing over load times, accessibility, and clean architecture until it ships right.
+                  Fast-forward to <b>2023</b>, when I was preparing for university admission. Since I was going to study CSE, I decided to get a head start by learning C programming before my first semester even began. I started with small projects — a calculator, a temperature converter, a currency converter — little things that helped me understand how code could solve actual problems. Once university started, I explored C++, Java (which, let&apos;s just say, was a journey of its own), and Python.
                 </p>
                 <p className="rv" style={sd(".15s")}>
-                  If I had to describe myself in one line: I&apos;m the person who reads documentation for fun, names Git branches like movie titles, and genuinely believes <b>console.log is a valid debugging strategy</b> — right up until it isn&apos;t.
+                  But web development never really left my mind.
+                </p>
+                <p className="rv" style={sd(".2s")}>
+                  I started experimenting with JavaScript and the DOM, building things like rock-paper-scissors games, calculators, and sometimes just coding random things without even knowing exactly what I was trying to build. I was learning by doing, breaking things, fixing them, and occasionally wondering why something worked in the first place. Then came Tailwind CSS, and I started challenging myself in a new way: <b>pick a website, study its first page, and recreate it as closely as possible using whatever I knew at the time.</b> Those challenges pushed me to think beyond writing code and start paying attention to layouts, details, and the overall user experience.
+                </p>
+                <p className="rv" style={sd(".25s")}>
+                  One thing led to another. I explored React, experimented with Firebase and MongoDB, and gradually moved from building small frontend experiments to creating complete web applications. During my second year at university, we started working on projects, and I decided to take things further by building my first full-stack website with React.
+                </p>
+                <p className="rv" style={sd(".3s")}>
+                  It was also around the time agentic AI started gaining popularity, so AI coding tools naturally became part of my workflow. I still built plenty of things by hand, but I began learning how to work alongside AI — using it to speed things up, explore unfamiliar concepts, and tackle problems that would have taken me much longer to solve alone. Along the way, I discovered Next.js, UI libraries, and new frameworks that kept expanding what I thought I could build.
+                </p>
+                <p className="rv" style={sd(".35s")}>
+                  University projects turned into opportunities to experiment with real-world ideas, and eventually, <b>a friend helped me land my first client</b>. Then came the second, the third, and more opportunities to turn what I had been learning into actual websites for actual people and businesses.
+                </p>
+                <p className="rv" style={sd(".4s")}>
+                  And that&apos;s how I got here — from a Class 8 student curious about HTML and CSS, to a CSE student building full-stack applications and working with real clients as a developer.
+                </p>
+                <p className="rv" style={sd(".45s")}>
+                  I&apos;m still learning, still experimenting, and still occasionally writing code just to see what happens. The tools have changed, the projects have grown, and AI has become part of the process, but the curiosity that started it all is still there.
+                </p>
+                <p className="rv" style={sd(".5s")}>
+                  <b>I&apos;m here to build things that work, look good, solve real problems, and keep pushing me to become a better developer.</b> And honestly, I feel like I&apos;m just getting started.
                 </p>
 
-                <p className="code-comment rv">beyond the editor</p>
+                <p className="code-comment rv">Beyond the Developer</p>
                 <div className="hobby-grid">
-                  <div className="hobby rv" style={sd("0s")}><span className="ic">🏏</span><b>Cricket</b><span>Weekend matches, questionable cover drive, unbeatable enthusiasm.</span></div>
-                  <div className="hobby rv" style={sd(".07s")}><span className="ic">📷</span><b>Film Photography</b><span>Shooting analog around old Khulna — patience taught by 36 frames.</span></div>
-                  <div className="hobby rv" style={sd(".14s")}><span className="ic">✏️</span><b>Sketching</b><span>Every good UI of mine starts life as a pencil wireframe.</span></div>
-                  <div className="hobby rv" style={sd(".21s")}><span className="ic">♟️</span><b>Chess</b><span>Blitz rated. Refuses to admit the blunder was a &quot;strategy&quot;.</span></div>
-                  <div className="hobby rv" style={sd(".28s")}><span className="ic">☕</span><b>Coffee</b><span>Pour-over or nothing. Fuel for every late-night deploy.</span></div>
+                  <div className="hobby rv" style={sd("0s")}><span className="ic">🎮</span><b>Gamer</b><span>90+ PC games completed and still pressing start</span></div>
                 </div>
 
                 <p className="code-comment rv">currently</p>
                 <div className="now-list rv">
-                  <span className="chip">📚 Learning system design</span>
-                  <span className="chip">🧪 Experimenting with Bun</span>
+                  <span className="chip">📚 Learning AI/ML & Automations</span>
+                  <span className="chip">🧪 Experimenting with Ai Models</span>
                   <span className="chip">🧠 Deep-diving advanced TypeScript</span>
                 </div>
               </div>
@@ -824,11 +851,13 @@ export default function Portfolio({
                     <span className="skill-pill" key={s.id ?? s.name}>
                       {s.logo ? (
                         <>
-                          <img
+                          <Image
                             className="skill-logo"
                             src={`https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/${s.logo}.svg`}
                             alt=""
-                            loading="lazy"
+                            width={128}
+                            height={128}
+                            unoptimized
                             onError={(ev) => {
                               const img = ev.currentTarget;
                               img.style.display = "none";
@@ -850,7 +879,7 @@ export default function Portfolio({
 
             <div className="skill-foot rv">
               <span className="mono">also fluent in →</span>
-              <span className="chip">Firebase</span><span className="chip">Socket.io</span><span className="chip">Stripe</span><span className="chip">Framer Motion</span><span className="chip">Prisma</span><span className="chip">Vite</span><span className="chip">Swagger</span>
+              <span className="chip">Firebase</span><span className="chip">Stripe</span><span className="chip">Framer Motion</span><span className="chip">Vite</span>
             </div>
           </div>
         </section>
@@ -899,16 +928,16 @@ export default function Portfolio({
               <span className="sec-line" />
             </div>
             <div className="xp-grid">
-            <div className="xp">
-              {experience.map((x, i) => (
-                <div className="xp-item rv" key={x.id ?? x.role} style={sd(`${(i * 0.1).toFixed(1)}s`)}>
-                  <div className="xp-meta"><h3>{x.role}</h3><span className="co">@ {x.company}</span><span className="yr">{x.period}</span></div>
-                  <ul>
-                    {x.bullets.map((b, bi) => <li key={bi}>{b}</li>)}
-                  </ul>
-                </div>
-              ))}
-            </div>
+              <div className="xp">
+                {experience.map((x, i) => (
+                  <div className="xp-item rv" key={x.id ?? x.role} style={sd(`${(i * 0.1).toFixed(1)}s`)}>
+                    <div className="xp-meta"><h3>{x.role}</h3><span className="co">@ {x.company}</span><span className="yr">{x.period}</span></div>
+                    <ul>
+                      {x.bullets.map((b, bi) => <li key={bi}>{b}</li>)}
+                    </ul>
+                  </div>
+                ))}
+              </div>
               <aside className="xp-panel rv" style={sd(".2s")}>
                 <div className="edu-panel-head">
                   <span className="dot r" /><span className="dot y" /><span className="dot g" />
@@ -954,7 +983,13 @@ export default function Portfolio({
                 <article key={p.id ?? p.slug} className={"pcard rv" + (p.wide ? " pcard--wide" : "")} style={sd(`${(i * 0.08).toFixed(2)}s`)}>
                   <div className="pc-media">
                     <span className="pc-tag">{p.tag}</span>
-                    <img src={p.imageUrl || `https://picsum.photos/seed/${p.seed}/1200/720`} alt={`${p.title} screenshot`} loading="lazy" />
+                    <Image
+                      src={p.imageUrl || `https://picsum.photos/seed/${p.seed}/1200/720`}
+                      alt={`${p.title} screenshot`}
+                      width={1200}
+                      height={720}
+                      sizes="(max-width: 700px) 92vw, (max-width: 1200px) 46vw, 620px"
+                    />
                     <span className="pc-arrow">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2}><path d="M7 17 17 7M7 7h10v10" /></svg>
                     </span>

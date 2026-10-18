@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { saveProject } from "./actions";
 import { useToast } from "../../toast";
@@ -107,8 +108,15 @@ export default function ProjectForm({ initial }: { initial?: Project }) {
           style={{ marginTop: 8 }}
         />
         {imageUrl && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={imageUrl} alt="cover preview" className="admin-preview" />
+          <Image
+            src={imageUrl}
+            alt="cover preview"
+            className="admin-preview"
+            width={480}
+            height={270}
+            style={{ height: "auto" }}
+            unoptimized
+          />
         )}
       </div>
 

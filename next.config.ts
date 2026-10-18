@@ -5,6 +5,25 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   reactCompiler: true,
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+        pathname: "/dkv9ksobc/image/upload/**",
+      },
+      {
+        protocol: "https",
+        hostname: "picsum.photos",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "csqpqibutnuzmiwiluiu.supabase.co",
+        pathname: "/storage/v1/object/public/**",
+      },
+    ],
+  },
   turbopack: {
     rules: {
       "*.css": {
