@@ -44,11 +44,6 @@ html.lock, html.lock body{overflow:hidden}
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   animation:grain 9s steps(6) infinite}
 @keyframes grain{0%,100%{transform:translate(0,0)}20%{transform:translate(-2%,2%)}40%{transform:translate(2%,-1%)}60%{transform:translate(-1%,-2%)}80%{transform:translate(1%,2%)}}
-#curDot,#curRing{position:fixed;top:0;left:0;pointer-events:none;z-index:200;border-radius:50%;display:none}
-#curDot{width:7px;height:7px;background:var(--acc)}
-#curRing{width:38px;height:38px;border:1px solid rgba(77,240,165,.55);transition:width .25s,height .25s,border-color .25s,background .25s}
-#curRing.big{width:64px;height:64px;border-color:var(--amb);background:rgba(255,180,84,.07)}
-@media (pointer:fine) and (prefers-reduced-motion:no-preference){#curDot,#curRing{display:block}}
 
 /* ============ LOADER (terminal boot) ============ */
 @property --angle{syntax:'<angle>';initial-value:0deg;inherits:false}

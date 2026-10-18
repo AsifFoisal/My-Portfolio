@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import { PROJECTS, type Project } from "@/data/projects";
+import TargetCursor from "./TargetCursor";
 import {
   DEFAULT_EDUCATION,
   DEFAULT_EXPERIENCE,
@@ -222,33 +223,6 @@ export default function Portfolio({
     }, { rootMargin: "-40% 0px -55% 0px" });
     document.querySelectorAll<HTMLElement>("main section[id]").forEach((s) => spyIO.observe(s));
     observers.push(spyIO);
-
-    /* ---------- CURSOR ---------- */
-    let rafCursor = 0;
-    if (finePointer && !reduced) {
-      const dot = $("curDot"), ring = $("curRing");
-      let mx = innerWidth / 2, my = innerHeight / 2, rx = mx, ry = my;
-      document.addEventListener("mousemove", (e) => {
-        mx = e.clientX; my = e.clientY;
-        if (dot) dot.style.transform = `translate(${mx - 3.5}px,${my - 3.5}px)`;
-      }, { signal: ac.signal });
-      const loop = () => {
-        rx += (mx - rx) * .16; ry += (my - ry) * .16;
-        if (ring) {
-          const s = ring.classList.contains("big") ? 32 : 19;
-          ring.style.transform = `translate(${rx - s}px,${ry - s}px)`;
-        }
-        rafCursor = requestAnimationFrame(loop);
-      };
-      rafCursor = requestAnimationFrame(loop);
-      rafs.push(rafCursor);
-      document.addEventListener("mouseover", (e) => {
-        if ((e.target as Element).closest("a,button,.pcard,input,textarea")) ring?.classList.add("big");
-      }, { signal: ac.signal });
-      document.addEventListener("mouseout", (e) => {
-        if ((e.target as Element).closest("a,button,.pcard,input,textarea")) ring?.classList.remove("big");
-      }, { signal: ac.signal });
-    }
 
     /* ---------- SCRAMBLE ROLE (starts after loader) ---------- */
     const roleEl = $("roleText");
@@ -555,7 +529,6 @@ export default function Portfolio({
     return () => {
       ac.abort();
       rafs.forEach((id) => cancelAnimationFrame(id));
-      cancelAnimationFrame(rafCursor);
       cancelAnimationFrame(rafFloat);
       cancelAnimationFrame(rafPara);
       cancelAnimationFrame(rafSweep);
@@ -592,8 +565,24 @@ export default function Portfolio({
       </div>
 
       <div className="noise" aria-hidden="true" />
-      <div id="curDot" aria-hidden="true" />
-      <div id="curRing" aria-hidden="true" />
+      <TargetCursor
+        targetSelector="a, button, .pcard"
+        spinDuration={2}
+        hoverDuration={0.2}
+        size={36}
+        cornerSize={12}
+        thickness={3}
+        padding={6}
+        dotSize={4}
+        cursorColor="#4df0a5"
+        cursorColorOnTarget="#ffb454"
+        blendMode="normal"
+        parallaxOn
+        matchRadius
+        showLabel
+        clickEffect
+        hideDefaultCursor
+      />
 
       {/* ============ NAVBAR ============ */}
       <header id="navbar">
@@ -980,7 +969,7 @@ export default function Portfolio({
             </div>
             <div className="p-grid" id="projectGrid">
               {projects.map((p, i) => (
-                <article key={p.id ?? p.slug} className={"pcard rv" + (p.wide ? " pcard--wide" : "")} style={sd(`${(i * 0.08).toFixed(2)}s`)}>
+                <article key={p.id ?? p.slug} className={"pcard rv" + (p.wide ? " pcard--wide" : "")} data-cursor-label="Open" style={sd(`${(i * 0.08).toFixed(2)}s`)}>
                   <div className="pc-media">
                     <span className="pc-tag">{p.tag}</span>
                     <Image
